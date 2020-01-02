@@ -53,7 +53,20 @@ You may find many other kinds of layers in the file, which were not mentioned in
 
 This layer maps the probability distributions of (Lx * Ly) sets to that of (Lx/2 * Ly/2) sets. If Lx or Ly is odd, the last row or column will be copied to make it even.
 
-### The parameters of "TTN_Pool_2by2to1":
+### Input:
+
+* input.shape = (num_samples, channels, sx, sy), if the ndimension of the input is 4
+
+* input.shape = (num_samples, channels, d, sx, sy), if the ndimension of the input is 5
+
+* Note:  
+  num_samples: number of samples  
+  channels: number of channels  
+  sx: number of rows of the sets (data)  
+  sy: number of columns of the sets (data)  
+  d: dimension of each set
+
+### Parameters:
 
 * c_in: the number of input channels; int
 
@@ -81,7 +94,7 @@ This layer maps the probability distributions of (Lx * Ly) sets to that of (Lx/2
 
 * add_bias: if add bias
 
-### To realize the simple tree BTN in the paper, we take:
+### To realize the simple tree BTN in the arXiv paper, we take:
 
 * c_in = c_out = 1
 
@@ -89,15 +102,13 @@ This layer maps the probability distributions of (Lx * Ly) sets to that of (Lx/2
 
 * out_dims = 5
 
-* simple_chl = True
-
 * if_pre_proc_T = 'square'  (to realize the rotation optimization proposed in the arXiv)
 
 * add_bias = False
 
 More instructions are to be added :)
 
-### As you can see, I am a researcher in quantum physics, and not so good at programming. Therefore, the code is a little bit chaotic. You are welcome to modify and/or use this code. If you think this code helps, please kindly cite the arXiv paper. Thanks a lot for your interest.
+### As you can see, I am a researcher in quantum physics, and not so good at programming. Therefore, the code is a little bit chaotic. You are welcome and appreciated to modify and/or use this code. If you think this code helps, please kindly cite the arXiv paper. Thanks a lot for your interest.
 
 
 Cheers,

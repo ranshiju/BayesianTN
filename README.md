@@ -9,13 +9,13 @@ To use this code, you may need to install: numpy, torch, termcolor, open-cv, mat
 ### Update log:
 
 * 2020-01-04: new layers (2xto1, 2yto1) added;  
-* 2020-01-04: New BTN added (see BTN2) in the arXiv paper
+* 2020-01-04: New BTN added (see BTN2 in the arXiv paper)
 
 ==========================================================
 
 ## At the beginning:
 
-Bayesian tensor network (BTN) is to efficiently represent the conditional probabilities of multiple sets of events with polynomial complexity. I have only used it for image classification. BTN should be more powerful when the number of events or sets of events is large, where the traditional Bayesian networks cannot efficiently work.
+Bayesian tensor network (BTN) is to efficiently represent the conditional probabilities of multiple sets of events with polynomial complexity. I have only used it for image classification. BTN should be more powerful when the number of events or sets of events is large, where the traditional Bayesian networks cannot efficiently work. It would be nice to hear any discussions and ideas :)
 
 ## How to build a Bayesian TN (BTN)?
 

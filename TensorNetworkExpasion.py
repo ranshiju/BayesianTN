@@ -1168,7 +1168,7 @@ class TTN_Pool_2by2to1(TNlayer_basic):
                          x[:, :, :, min(nx * 2 + 1, sx - 1), ny * 2],
                          x[:, :, :, nx * 2, min(ny * 2 + 1, sy - 1)],
                          x[:, :, :, min(nx * 2 + 1, sx - 1), min(ny * 2 + 1, sy - 1)],
-                         tensors[:, :, nx, ny, :, :, :, :, :]])
+                         tensors[:, nx, ny, :, :, :, :, :]])
                     if self.add_bias:
                         x1[:, :, :, nx, ny] = \
                             x1[:, :, :, nx, ny] + self.bias[:, nx, ny, :].repeat(
@@ -1336,7 +1336,7 @@ class TTN_Conv_2by2to1(TNlayer_basic):
                          x[:, :, :, nx+1, ny],
                          x[:, :, :, nx, ny+1],
                          x[:, :, :, nx+1, ny+1],
-                         self.tensors[:, nx, ny, :, :, :, :, :]])
+                         self.tensors[:, :, nx, ny, :, :, :, :, :]])
                     x1[:, :, :, nx, ny] = \
                         x1[:, :, :, nx, ny] + self.bias[:, nx, ny, :].repeat(
                             num, 1, 1)
@@ -1414,6 +1414,166 @@ class TTN_ConvTI_2by2to1(TNlayer_basic):
         if self.out_dims != 5:
             s = x1.shape
             x1 = x1.view(s[0], s[1] * s[2], s[3], s[4])
+        return x1
+
+
+class TTN_Pool_2xto1(TNlayer_basic):
+
+    def __init__(self, c_in, c_out, nx, ny, din, dout, device,
+                 dtype=None, ini_way='No.1', out_dims=5,
+                 simple_chl=False, if_pre_proc_T=False, add_bias=True):
+        super(TTN_Pool_2xto1, self).__init__(
+            device=device, dtype=dtype, out_dims=out_dims,
+            simple_channel=simple_chl, if_pre_proc_T=if_pre_proc_T, add_bias=add_bias)
+        self.c_in = c_in
+        self.c_out = c_out
+        self.nx = nx
+        self.ny = ny
+        self.din = din
+        self.dout = dout
+        if self.simple_channel:
+            self.initial_tensor_to_layer(
+                (c_in, nx, ny, din, din, dout),
+                (c_out, nx, ny, dout), ini_way=ini_way)
+        else:
+            self.initial_tensor_to_layer(
+                (c_in, c_out, nx, ny, din, din, dout),
+                (c_out, nx, ny, dout), ini_way=ini_way)
+
+    def forward(self, x):
+        tensors = self.pre_process_tensors()
+        if x.ndimension() == 4:
+            # assume from the output of NN
+            num, channel0, sx, sy = x.shape
+            x = x.view(num, channel0, 1, sx, sy)
+            d = 1
+        else:
+            num, channel0, d, sx, sy = x.shape
+        sx1 = (sx // 2) + (sx % 2)
+        sy1 = sy
+        flag_error = False
+        if sx1 != self.nx:
+            flag_error = True
+            bf.warning('nx = %g in TTN_Pool_2by2to1 layer mismatch with data = %g'
+                       % (self.nx, sx1))
+        if sy1 != self.ny:
+            flag_error = True
+            bf.warning('nx = %g in TTN_Pool_2by2to1 layer mismatch with data = %g'
+                       % (self.ny, sy1))
+        if self.simple_channel and (self.c_in != self.c_out):
+            flag_error = True
+            bf.warning('Error: for simple channels, it requires c_in = c_out')
+        if flag_error:
+            sys.exit(1)
+        x1 = tc.zeros((num, self.c_out, self.dout, sx1, sy1),
+                      device=x.device, dtype=x.dtype)
+        if self.simple_channel:
+            for nx in range(sx1):
+                for ny in range(sy1):
+                    x1[:, :, :, nx, ny] = tc.einsum(
+                        'nci,ncj,cijo->nco',
+                        [x[:, :, :, nx * 2, ny],
+                         x[:, :, :, min(nx * 2 + 1, sx - 1), ny],
+                         tensors[:, nx, ny, :, :, :]])
+                    if self.add_bias:
+                        x1[:, :, :, nx, ny] = \
+                            x1[:, :, :, nx, ny] + self.bias[:, nx, ny, :].repeat(
+                                num, 1, 1)
+        else:
+            for nx in range(sx1):
+                for ny in range(sy1):
+                    x1[:, :, :, nx, ny] = tc.einsum(
+                        'nci,ncj,cpijo->npo',
+                        [x[:, :, :, nx*2, ny],
+                         x[:, :, :, min(nx*2+1, sx-1), ny],
+                         tensors[:, :, nx, ny, :, :, :]])
+                    if self.add_bias:
+                        x1[:, :, :, nx, ny] = \
+                            x1[:, :, :, nx, ny] + self.bias[:, nx, ny, :].repeat(
+                                num, 1, 1)
+        if self.out_dims != 5:
+            s = x1.shape
+            x1 = x1.view(s[0], s[1]*s[2], s[3], s[4])
+        return x1
+
+
+class TTN_Pool_2yto1(TNlayer_basic):
+
+    def __init__(self, c_in, c_out, nx, ny, din, dout, device,
+                 dtype=None, ini_way='No.1', out_dims=5,
+                 simple_chl=False, if_pre_proc_T=False, add_bias=True):
+        super(TTN_Pool_2yto1, self).__init__(
+            device=device, dtype=dtype, out_dims=out_dims,
+            simple_channel=simple_chl, if_pre_proc_T=if_pre_proc_T, add_bias=add_bias)
+        self.c_in = c_in
+        self.c_out = c_out
+        self.nx = nx
+        self.ny = ny
+        self.din = din
+        self.dout = dout
+        if self.simple_channel:
+            self.initial_tensor_to_layer(
+                (c_in, nx, ny, din, din, dout),
+                (c_out, nx, ny, dout), ini_way=ini_way)
+        else:
+            self.initial_tensor_to_layer(
+                (c_in, c_out, nx, ny, din, din, dout),
+                (c_out, nx, ny, dout), ini_way=ini_way)
+
+    def forward(self, x):
+        tensors = self.pre_process_tensors()
+        if x.ndimension() == 4:
+            # assume from the output of NN
+            num, channel0, sx, sy = x.shape
+            x = x.view(num, channel0, 1, sx, sy)
+            d = 1
+        else:
+            num, channel0, d, sx, sy = x.shape
+        sx1 = sx
+        sy1 = (sy // 2) + (sy % 2)
+        flag_error = False
+        if sx1 != self.nx:
+            flag_error = True
+            bf.warning('nx = %g in TTN_Pool_2by2to1 layer mismatch with data = %g'
+                       % (self.nx, sx1))
+        if sy1 != self.ny:
+            flag_error = True
+            bf.warning('nx = %g in TTN_Pool_2by2to1 layer mismatch with data = %g'
+                       % (self.ny, sy1))
+        if self.simple_channel and (self.c_in != self.c_out):
+            flag_error = True
+            bf.warning('Error: for simple channels, it requires c_in = c_out')
+        if flag_error:
+            sys.exit(1)
+        x1 = tc.zeros((num, self.c_out, self.dout, sx1, sy1),
+                      device=x.device, dtype=x.dtype)
+        if self.simple_channel:
+            for nx in range(sx1):
+                for ny in range(sy1):
+                    x1[:, :, :, nx, ny] = tc.einsum(
+                        'nci,ncj,cijo->nco',
+                        [x[:, :, :, nx, ny * 2],
+                         x[:, :, :, nx, min(ny * 2 + 1, sy - 1)],
+                         tensors[:, nx, ny, :, :, :]])
+                    if self.add_bias:
+                        x1[:, :, :, nx, ny] = \
+                            x1[:, :, :, nx, ny] + self.bias[:, nx, ny, :].repeat(
+                                num, 1, 1)
+        else:
+            for nx in range(sx1):
+                for ny in range(sy1):
+                    x1[:, :, :, nx, ny] = tc.einsum(
+                        'nci,ncj,cpijo->npo',
+                        [x[:, :, :, nx, ny * 2],
+                         x[:, :, :, nx, min(ny * 2 + 1, sy - 1)],
+                         tensors[:, :, nx, ny, :, :, :]])
+                    if self.add_bias:
+                        x1[:, :, :, nx, ny] = \
+                            x1[:, :, :, nx, ny] + self.bias[:, nx, ny, :].repeat(
+                                num, 1, 1)
+        if self.out_dims != 5:
+            s = x1.shape
+            x1 = x1.view(s[0], s[1]*s[2], s[3], s[4])
         return x1
 
 

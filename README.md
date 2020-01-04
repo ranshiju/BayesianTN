@@ -5,6 +5,18 @@ Bayesian tensor network
 To use this code, you may need to install: numpy, torch, termcolor, open-cv, matplotlib, and etc.
 
 ==========================================================
+
+### Update log:
+
+* 2020-01-04: new layers (2xto1, 2yto1) added;  
+* 2020-01-04: New BTN added (see BTN2) in the arXiv paper
+
+==========================================================
+
+## At the beginning:
+
+Bayesian tensor network (BTN) is to efficiently represent the conditional probabilities of multiple sets of events with polynomial complexity. I have only used it for image classification. BTN should be more powerful when the number of events or sets of events is large, where the traditional Bayesian networks cannot efficiently work.
+
 ## How to build a Bayesian TN (BTN)?
 
 You may find an example of a BTN in the file "BayesTN.py".
@@ -13,7 +25,7 @@ In the class "VL_Bayes_sum1_Vsoftmax_TN_BP", you can find the BTN with a simple 
 
 I will explain some more details later below.
 
-## How to use a Bayesian TN (BTN)?
+## How to use a BTN?
 
 The optimization algorithm can be found as the function "tn_multi_classifier_bp_mnist" in "TNN algorithms.py". 
 
@@ -23,7 +35,7 @@ You may refer to "RunTTN.py" to see how to use a built BTN.Let me explain this f
 import CollectedTNN as ctnn
 from TNNalgorithms import tn_multi_classifier_bp_mnist as mps_bp
 
-# import the BTN
+# import the default parameters of BTN
 from BayesTN import Paras_VL_Bayes_sum1_Vsoftmax_TN
 # Set all default parameters
 para = Paras_VL_Bayes_sum1_Vsoftmax_TN()
@@ -44,7 +56,7 @@ All default parameters can be found in function "parameter_tn_bp_mnist" in "TNNa
 
 All layers can be mixedly used with the layers in torch.nn.
 
-The modules for the layers in BTN can be found in "TNNalgorithms.py", particularly the class "TTN_Pool_2by2to1".
+The modules for the layers in BTN can be found in "TNNalgorithms.py", particularly the classes "TTN_Pool_2by2to1", "TTN_Pool_2xto1", "TTN_Pool_2yto1" that are used in the arXiv paper.
 
 You may find many other kinds of layers in the file, which were not mentioned in the arXiv paper. They are for testing ideas.
 
@@ -94,7 +106,13 @@ This layer maps the probability distributions of (Lx * Ly) sets to that of (Lx/2
 
 * add_bias: if add bias
 
-### To realize the simple tree BTN in the arXiv paper, we take:
+### Output:
+
+* if out_dims = 4, output.shape = (num_samples, c_out*d, sx, sy)
+
+* if out_dims = 5, output.shape = (num_samples, c_out, d, sx, sy)
+
+### To realize the simple tree BTN1 in the arXiv paper, we take:
 
 * c_in = c_out = 1
 

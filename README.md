@@ -2,7 +2,9 @@
 Bayesian tensor network
 (see https://arxiv.org/abs/1912.12923)
 
-To use this code, you may need to install: numpy, torch, termcolor, open-cv, matplotlib, and etc.
+To use this code, you may need to install: numpy, torch, termcolor, open-cv, matplotlib, and etc. The code (in the subfolder "pytorch_gpu_memory") to watch the status of GPU was downloaded from https://github.com/darr/pytorch_gpu_memory.
+
+The raw data of the curves shown in the arXiv was put in the subfolder "raw_data". Please open it by Origin.
 
 ==========================================================
 

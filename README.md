@@ -30,6 +30,8 @@ I will explain some more details later below.
 
 ## How to use a BTN?
 
+Note: to reproduce the results of BTN1 and BTN2 in the paper, run "RunBTN1.py" and "RunBTN2.py" respectively. To try Adam, run "RunBTN1adam.py"
+
 The optimization algorithm can be found as the function "tn_multi_classifier_bp_mnist" in "TNN algorithms.py". 
 
 You may refer to "RunTTN.py" to see how to use a built BTN.Let me explain this file in some details.

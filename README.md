@@ -10,6 +10,7 @@ The raw data of the curves shown in the arXiv was put in the subfolder "raw_data
 
 ### Update log:
 
+* 2020-01-17: Scripts to run BTN1 and BTN2 to reproduce the results in the paper added;  
 * 2020-01-04: new layers (2xto1, 2yto1) added;  
 * 2020-01-04: New BTN added (see BTN2 in the arXiv paper)
 
